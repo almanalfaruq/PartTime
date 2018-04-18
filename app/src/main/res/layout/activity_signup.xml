@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -16,12 +16,11 @@
 
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="200dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginLeft="80dp"
             android:layout_marginRight="80dp"
-            android:src="@drawable/logohitam"
-            android:layout_weight="1"/>
+            android:src="@drawable/logohitam"/>
 
         <!--  Name Label -->
         <android.support.design.widget.TextInputLayout
@@ -33,6 +32,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Name"
+                android:inputType="textCapWords|textAutoComplete" />
+        </android.support.design.widget.TextInputLayout>
+
+        <!--  Name Label -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/input_ttl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tempat, Tanggal Lahir"
+                android:inputType="textCapWords" />
+        </android.support.design.widget.TextInputLayout>
+
+        <!--  Name Label -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/input_address"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:hint="Alamat"
+                android:gravity="top"
                 android:inputType="textCapWords" />
         </android.support.design.widget.TextInputLayout>
 
@@ -63,6 +89,43 @@
                 android:inputType="textPassword" />
         </android.support.design.widget.TextInputLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/ll_cv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/label_cv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="CV"
+                    android:textColor="?android:textColorHint"/>
+
+                <EditText
+                    android:id="@+id/text_file_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Nama File"
+                    android:textColor="?android:textColorHint"/>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/button_choose_file"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/ll_cv"
+                android:layout_alignParentEnd="true"
+                android:text="Pilih"/>
+
+        </RelativeLayout>
+
         <!-- Signup Button -->
         <Button
             android:id="@+id/button_signup"
@@ -83,4 +146,4 @@
             android:textSize="16dip" />
 
     </LinearLayout>
-</LinearLayout>
+</ScrollView>
