@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/profil_menu"
+        android:icon="@drawable/akun"
+        android:title="Profil Akun" />
+
+    <item
+        android:id="@+id/notif_menu"
+        android:icon="@drawable/notifikasi"
+        android:title="Notifikasi" />
+
+    <item
+        android:id="@+id/lowongan_menu"
+        android:icon="@drawable/add"
+        android:title="Lowongan Saya" />
+
+    <item
+        android:id="@+id/bantuan_menu"
+        android:icon="@drawable/bantuan"
+        android:title="Bantuan" />
+
+    <item
+        android:id="@+id/logout_menu"
+        android:icon="@drawable/keluar"
+        android:title="Log Out" />
+</menu>
