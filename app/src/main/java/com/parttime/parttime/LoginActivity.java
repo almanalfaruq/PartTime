@@ -33,7 +33,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.button_login:
                 Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show();
-                // Starting main activity
+                startActivity(MainActivity.class);
                 break;
             case R.id.link_signup:
                 startActivity(SignupActivity.class);
