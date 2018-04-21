@@ -92,7 +92,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.profil_menu) {
-            Toast.makeText(this, "Profil Activity", Toast.LENGTH_SHORT).show();
+            Intent profilIntent = new Intent(MainActivity.this, ProfilActivity.class);
+            startActivity(profilIntent);
         } else if (id == R.id.notif_menu) {
             Toast.makeText(this, "Notification Activity", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.lowongan_menu) {
