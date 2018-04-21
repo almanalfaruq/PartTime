@@ -16,11 +16,13 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        return null;
+        if (position ==0) {
+            return new KategoriFragment();
+        } else return new HotFragment();
     }
 
     @Override
     public int getCount() {
-        return 0;
+        return 2;
     }
 }
