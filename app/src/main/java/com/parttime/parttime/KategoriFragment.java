@@ -1,4 +1,4 @@
-package activity;
+package com.parttime.parttime;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,15 +7,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
 import project.parttimemage.R;
 
 /**
  * Created by hp on 2/10/2018.
  */
-
 public class KategoriFragment extends Fragment {
-
     private LinearLayout linearFood, linearCleaning, linearTeacher, linearTransportation;
 
     @Override
@@ -59,7 +56,6 @@ public class KategoriFragment extends Fragment {
                 getActivity().startActivity(intent);
             }
         });
-
         return rootView;
     }
 }
