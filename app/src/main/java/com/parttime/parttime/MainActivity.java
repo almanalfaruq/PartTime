@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ViewPager viewPager;
     private DrawerLayout drawer;
     private TabLayout tabLayout;
-    private String[] pageTitle = {"Kategori", "Hot"};
     private static Context context;
 
     @Override
@@ -48,17 +47,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         //setting Tab layout (number of Tabs = number of ViewPager pages)
-        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        for (int i = 0; i < 2; i++) {
-            tabLayout.addTab(tabLayout.newTab().setText(pageTitle[i]));
-        }
+        tabLayout = findViewById(R.id.tab_layout);
 
         //set gravity for tab bar
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         //handling navigation view item event
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        assert navigationView != null;
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         //set viewpager adapter
@@ -67,24 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //change Tab selection when swipe ViewPager
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-
-        //change ViewPager page when tab selected
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     @Override

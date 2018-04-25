@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import project.parttimemage.R;
 
 /**
  * Created by hp on 2/10/2018.
@@ -31,29 +30,25 @@ public class KategoriFragment extends Fragment {
         linearTeacher.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                Intent intent = new Intent(getActivity(),TeacherActivity.class);
-                getActivity().startActivity(intent);
+                //TODO Teacher Linear Layout on click listener
             }
         });
         linearFood.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                Intent intent = new Intent(getActivity(),TeacherActivity.class);
-                getActivity().startActivity(intent);
+                //TODO Food Linear Layout on click listener
             }
         });
         linearCleaning.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                Intent intent = new Intent(getActivity(),TeacherActivity.class);
-                getActivity().startActivity(intent);
+                //TODO Cleaning Linear Layout on click listener
             }
         });
         linearTransportation.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                Intent intent = new Intent(getActivity(),TeacherActivity.class);
-                getActivity().startActivity(intent);
+                //TODO Transportation Linear Layout on click listener
             }
         });
         return rootView;
