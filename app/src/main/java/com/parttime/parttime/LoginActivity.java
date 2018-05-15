@@ -73,6 +73,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onSuccess(AuthResult authResult) {
                         // Starting main activity
+                        startActivity(MainActivity.class);
                         Toast.makeText(LoginActivity.this,
                                 "Login success", Toast.LENGTH_SHORT).show();
                     }
