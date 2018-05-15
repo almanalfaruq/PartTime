@@ -25,6 +25,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.UploadTask;
 import com.nbsp.materialfilepicker.MaterialFilePicker;
@@ -64,6 +65,10 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
     private void initFirebase() {
         fAuth = FirebaseAuth.getInstance();
         fFirestore = FirebaseFirestore.getInstance();
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build();
+        fFirestore.setFirestoreSettings(settings);
         fStorage = FirebaseStorage.getInstance();
     }
 
@@ -116,7 +121,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         });
     }
 
-    private void createUserInfo(String userId) {
+    private void createUserInfo(final String userId) {
         String name = mTxtName.getEditText().getText().toString();
         String ttl = mTxtTtl.getEditText().getText().toString();
         String address = mTxtAddress.getEditText().getText().toString();
@@ -127,7 +132,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     @Override
                     public void onSuccess(Void aVoid) {
                         if (isFileExists()) {
-                            uploadCv();
+                            uploadCv(userId);
                         }
                     }
                 })
@@ -145,15 +150,18 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         return !mTxtFilePath.getText().toString().isEmpty();
     }
 
-    private void uploadCv() {
+    private void uploadCv(final String userId) {
         String filePath = mTxtFilePath.getText().toString();
         try {
             InputStream inputStream = new FileInputStream(new File(filePath));
             UploadTask uploadTask =
-                    fStorage.getReference("cv").putStream(inputStream);
+                    fStorage.getReference("cv").child(userId).putStream(inputStream);
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    fFirestore.collection("users")
+                            .document(userId).update("cv",
+                            taskSnapshot.getStorage().getDownloadUrl());
                     Toast.makeText(SignupActivity.this,
                             "Register success!", Toast.LENGTH_SHORT).show();
                     onBackPressed();

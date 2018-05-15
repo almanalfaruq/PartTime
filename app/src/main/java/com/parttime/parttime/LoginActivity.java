@@ -65,27 +65,49 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void authenticateUser() {
-        Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show();
         String email = mTxtEmail.getEditText().getText().toString();
         String password = mTxtPassword.getEditText().getText().toString();
-        fAuth.signInWithEmailAndPassword(email, password)
-                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                    @Override
-                    public void onSuccess(AuthResult authResult) {
-                        // Starting main activity
-                        startActivity(MainActivity.class);
-                        Toast.makeText(LoginActivity.this,
-                                "Login success", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(LoginActivity.this,
-                                "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, e.getMessage());
-                    }
-                });
+        if (isEmailAndPasswordEmpty(email, password)) {
+            Toast.makeText(this, "Harap lengkapi data", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show();
+            fAuth.signInWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                        @Override
+                        public void onSuccess(AuthResult authResult) {
+                            // Starting main activity
+                            startActivity(MainActivity.class);
+                            Toast.makeText(LoginActivity.this,
+                                    "Login success", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(LoginActivity.this,
+                                    "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, e.getMessage());
+                        }
+                    });
+        }
+    }
+
+    private boolean isEmailAndPasswordEmpty(String email, String password) {
+        if (email == null || email.isEmpty()) {
+            mTxtEmail.setErrorEnabled(true);
+            mTxtEmail.setError("Harap isi email terlebih dahulu");
+            mTxtPassword.setErrorEnabled(false);
+            mTxtPassword.setError(null);
+            return true;
+        } else if (password == null || password.isEmpty()) {
+            mTxtPassword.setErrorEnabled(true);
+            mTxtPassword.setError("Harap isi password terlebih dahulu");
+            mTxtEmail.setErrorEnabled(false);
+            mTxtEmail.setError(null);
+            return true;
+        }
+        return false;
     }
 
     private void startActivity(Class<?> cls) {
