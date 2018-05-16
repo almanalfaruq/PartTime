@@ -10,6 +10,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -103,22 +104,24 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void registerNewUser() {
-        String email = mTxtEmail.getEditText().getText().toString();
-        String password = mTxtPassword.getEditText().getText().toString();
-        fAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    FirebaseUser user = task.getResult().getUser();
-                    createUserInfo(user.getUid());
-                } else {
-                    Toast.makeText(SignupActivity.this,
-                            "Tidak bisa mendaftarkan pengguna", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, task.getException().getMessage());
-                }
-            }
-        });
+        if (isInputValid()) {
+            String email = mTxtEmail.getEditText().getText().toString();
+            String password = mTxtPassword.getEditText().getText().toString();
+            fAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                FirebaseUser user = task.getResult().getUser();
+                                createUserInfo(user.getUid());
+                            } else {
+                                Toast.makeText(SignupActivity.this,
+                                        "Tidak bisa mendaftarkan pengguna", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, task.getException().getMessage());
+                            }
+                        }
+                    });
+        }
     }
 
     private void createUserInfo(final String userId) {
@@ -133,6 +136,10 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     public void onSuccess(Void aVoid) {
                         if (isFileExists()) {
                             uploadCv(userId);
+                        } else {
+                            Toast.makeText(SignupActivity.this,
+                                    "Register success!", Toast.LENGTH_SHORT).show();
+                            onBackPressed();
                         }
                     }
                 })
@@ -234,5 +241,93 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 mTxtFilePath.setText(path);
             }
         }
+    }
+
+    private boolean isInputValid() {
+        Editable nama = mTxtName.getEditText().getText();
+        Editable ttl = mTxtTtl.getEditText().getText();
+        Editable address = mTxtAddress.getEditText().getText();
+        Editable email = mTxtEmail.getEditText().getText();
+        Editable password = mTxtPassword.getEditText().getText();
+        Editable filePath = mTxtFilePath.getText();
+        if (nama == null || nama.toString().isEmpty()) {
+            mTxtName.setError("Harap isi nama");
+            mTxtName.setErrorEnabled(true);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (ttl == null || ttl.toString().isEmpty()) {
+            mTxtTtl.setError("Harap isi TTL");
+            mTxtTtl.setErrorEnabled(true);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (address == null || address.toString().isEmpty()) {
+            mTxtAddress.setError("Harap isi Alamat");
+            mTxtAddress.setErrorEnabled(true);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (email == null || email.toString().isEmpty()) {
+            mTxtEmail.setError("Harap isi Email");
+            mTxtEmail.setErrorEnabled(true);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (password == null || password.toString().isEmpty()) {
+            mTxtPassword.setError("Harap isi Password");
+            mTxtPassword.setErrorEnabled(true);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (filePath == null || password.toString().isEmpty()) {
+            mTxtFilePath.setError("Harap isi CV");
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            return false;
+        }
+        return true;
     }
 }
