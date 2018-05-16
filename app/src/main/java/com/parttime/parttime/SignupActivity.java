@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,10 +47,12 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
 
     private static final String TAG = SignupActivity.class.getSimpleName();
 
+    private ProgressBar mProgressBar;
+    private ScrollView mSvRegister;
     private Button mBtnSignup, mBtnChooseFile;
-    private TextView mTxtLogin;
+    private TextView mTxtLogin, mTxtLoading;
     private TextInputLayout mTxtName, mTxtTtl,
-            mTxtAddress, mTxtEmail, mTxtPassword;
+    mTxtAddress, mTxtEmail, mTxtPassword;
     private EditText mTxtFilePath;
 
     private FirebaseAuth fAuth;
@@ -74,6 +78,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initWidget() {
+        mSvRegister = findViewById(R.id.sv_register);
         mBtnSignup = findViewById(R.id.button_signup);
         mBtnChooseFile = findViewById(R.id.button_choose_file);
         mTxtLogin = findViewById(R.id.link_login);
@@ -83,6 +88,9 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         mTxtEmail = findViewById(R.id.input_email);
         mTxtPassword = findViewById(R.id.input_password);
         mTxtFilePath = findViewById(R.id.text_file_path);
+        mProgressBar = findViewById(R.id.progress_bar);
+        mTxtLoading = findViewById(R.id.text_loading);
+        mProgressBar.setIndeterminate(true);
         mBtnSignup.setOnClickListener(this);
         mTxtLogin.setOnClickListener(this);
         mBtnChooseFile.setOnClickListener(this);
@@ -105,6 +113,9 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
 
     private void registerNewUser() {
         if (isInputValid()) {
+            mSvRegister.setVisibility(View.GONE);
+            mProgressBar.setVisibility(View.VISIBLE);
+            mTxtLoading.setVisibility(View.VISIBLE);
             String email = mTxtEmail.getEditText().getText().toString();
             String password = mTxtPassword.getEditText().getText().toString();
             fAuth.createUserWithEmailAndPassword(email, password)
@@ -115,6 +126,9 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                                 FirebaseUser user = task.getResult().getUser();
                                 createUserInfo(user.getUid());
                             } else {
+                                mProgressBar.setVisibility(View.GONE);
+                                mTxtLoading.setVisibility(View.GONE);
+                                mSvRegister.setVisibility(View.VISIBLE);
                                 Toast.makeText(SignupActivity.this,
                                         "Tidak bisa mendaftarkan pengguna", Toast.LENGTH_SHORT).show();
                                 Log.d(TAG, task.getException().getMessage());
@@ -134,21 +148,19 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        if (isFileExists()) {
-                            uploadCv(userId);
-                        } else {
-                            Toast.makeText(SignupActivity.this,
-                                    "Register success!", Toast.LENGTH_SHORT).show();
-                            onBackPressed();
-                        }
+                        uploadCv(userId);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        mProgressBar.setVisibility(View.GONE);
+                        mTxtLoading.setVisibility(View.GONE);
+                        mSvRegister.setVisibility(View.VISIBLE);
                         Toast.makeText(SignupActivity.this,
-                                "Tidak bisa mendaftarkan pengguna", Toast.LENGTH_SHORT).show();
+                                "Pengguna terdaftar tanpa data", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, e.getMessage());
+                        onBackPressed();
                     }
                 });
     }
@@ -166,9 +178,13 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mTxtLoading.setVisibility(View.GONE);
+                    mSvRegister.setVisibility(View.VISIBLE);
                     fFirestore.collection("users")
                             .document(userId).update("cv",
-                            taskSnapshot.getStorage().getDownloadUrl());
+                            taskSnapshot.getStorage().getDownloadUrl()
+                                    .getResult().toString());
                     Toast.makeText(SignupActivity.this,
                             "Register success!", Toast.LENGTH_SHORT).show();
                     onBackPressed();
@@ -176,9 +192,13 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mTxtLoading.setVisibility(View.GONE);
+                    mSvRegister.setVisibility(View.VISIBLE);
                     Toast.makeText(SignupActivity.this,
-                            "Tidak bisa mendaftarkan pengguna", Toast.LENGTH_SHORT).show();
+                            "Tidak bisa upload document sekarang, coba lagi nanti", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, e.getMessage());
+                    onBackPressed();
                 }
             });
         } catch (FileNotFoundException e) {
