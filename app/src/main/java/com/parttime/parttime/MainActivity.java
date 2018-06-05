@@ -16,6 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 /**
  * Created by danasw on 19/04/2018.
  */
@@ -26,12 +28,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawer;
     private TabLayout tabLayout;
     private static Context context;
+    private FirebaseAuth fAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        fAuth = FirebaseAuth.getInstance();
         context = this;
 
         viewPager = (ViewPager)findViewById(R.id.view_pager);
@@ -70,16 +74,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.profil_menu) {
-            Intent profilIntent = new Intent(MainActivity.this, ProfilActivity.class);
+            Intent profilIntent = new Intent(this, ProfilActivity.class);
             startActivity(profilIntent);
         } else if (id == R.id.notif_menu) {
             Toast.makeText(this, "Notification Activity", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.lowongan_menu) {
-            Toast.makeText(this, "Lowongan Activity", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, JobAddActivity.class));
         } else if (id == R.id.bantuan_menu) {
             Toast.makeText(this, "Bantuan Activity", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.logout_menu) {
-            Toast.makeText(this, "Profil Activity", Toast.LENGTH_SHORT).show();
+            fAuth.signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
         }
 
         drawer.closeDrawer(GravityCompat.START);
