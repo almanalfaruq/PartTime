@@ -3,6 +3,7 @@ package com.parttime.parttime;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -148,7 +149,11 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        uploadCv(userId);
+                        if (isFileExists()) {
+                            uploadCv(userId);
+                        } else {
+                            Toast.makeText(SignupActivity.this, "Silahkan pilih CV", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -178,16 +183,22 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    mProgressBar.setVisibility(View.GONE);
-                    mTxtLoading.setVisibility(View.GONE);
-                    mSvRegister.setVisibility(View.VISIBLE);
-                    fFirestore.collection("users")
-                            .document(userId).update("cv",
-                            taskSnapshot.getStorage().getDownloadUrl()
-                                    .getResult().toString());
-                    Toast.makeText(SignupActivity.this,
-                            "Register success!", Toast.LENGTH_SHORT).show();
-                    onBackPressed();
+                    taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            mProgressBar.setVisibility(View.GONE);
+                            mTxtLoading.setVisibility(View.GONE);
+                            mSvRegister.setVisibility(View.VISIBLE);
+                            fFirestore.collection("users")
+                                    .document(userId).update("cv",
+                                    uri.toString());
+                            Toast.makeText(SignupActivity.this,
+                                    "Register success!", Toast.LENGTH_SHORT).show();
+                            fAuth.signOut();
+                            onBackPressed();
+                            finish();
+                        }
+                    });
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
