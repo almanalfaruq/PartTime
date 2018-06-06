@@ -10,17 +10,32 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 public class ViewPagerAdapter extends FragmentPagerAdapter {
 
+    private String[] pageTitle = {"Kategori", "Hot"};
+
     public ViewPagerAdapter(FragmentManager fm) {
         super(fm);
     }
 
     @Override
     public Fragment getItem(int position) {
-        return null;
+        if (position ==0) {
+            return new KategoriFragment();
+        } else {
+            return new HotFragment();
+        }
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        if (position == 0) {
+            return pageTitle[0];
+        } else {
+            return pageTitle[1];
+        }
     }
 
     @Override
     public int getCount() {
-        return 0;
+        return 2;
     }
 }

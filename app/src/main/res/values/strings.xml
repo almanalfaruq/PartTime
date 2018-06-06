@@ -3,4 +3,11 @@
     <!--NAV_DRAWER-->
     <string name="navigation_drawer_open">Open</string>
     <string name="navigation_drawer_close">Close</string>
+
+    <string-array name="list_category">
+        <item>Pengajar</item>
+        <item>Transportasi</item>
+        <item>Tempat Makan</item>
+        <item>Kebersihan</item>
+    </string-array>
 </resources>

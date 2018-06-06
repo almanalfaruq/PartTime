@@ -16,6 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 /**
  * Created by danasw on 19/04/2018.
  */
@@ -25,14 +27,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ViewPager viewPager;
     private DrawerLayout drawer;
     private TabLayout tabLayout;
-    private String[] pageTitle = {"Kategori", "Hot"};
     private static Context context;
+    private FirebaseAuth fAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        fAuth = FirebaseAuth.getInstance();
         context = this;
 
         viewPager = (ViewPager)findViewById(R.id.view_pager);
@@ -48,17 +51,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         //setting Tab layout (number of Tabs = number of ViewPager pages)
-        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        for (int i = 0; i < 2; i++) {
-            tabLayout.addTab(tabLayout.newTab().setText(pageTitle[i]));
-        }
+        tabLayout = findViewById(R.id.tab_layout);
 
         //set gravity for tab bar
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         //handling navigation view item event
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        assert navigationView != null;
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         //set viewpager adapter
@@ -67,24 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //change Tab selection when swipe ViewPager
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-
-        //change ViewPager page when tab selected
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     @Override
@@ -92,15 +74,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.profil_menu) {
-            Toast.makeText(this, "Profil Activity", Toast.LENGTH_SHORT).show();
+            Intent profilIntent = new Intent(this, ProfilActivity.class);
+            startActivity(profilIntent);
         } else if (id == R.id.notif_menu) {
             Toast.makeText(this, "Notification Activity", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.lowongan_menu) {
-            Toast.makeText(this, "Lowongan Activity", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, JobAddActivity.class));
         } else if (id == R.id.bantuan_menu) {
             Toast.makeText(this, "Bantuan Activity", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.logout_menu) {
-            Toast.makeText(this, "Profil Activity", Toast.LENGTH_SHORT).show();
+            fAuth.signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
         }
 
         drawer.closeDrawer(GravityCompat.START);
