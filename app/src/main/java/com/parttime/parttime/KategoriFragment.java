@@ -30,25 +30,33 @@ public class KategoriFragment extends Fragment {
         linearTeacher.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                //TODO Teacher Linear Layout on click listener
+                Intent intent = new Intent(getContext(), KategoriActivity.class);
+                intent.putExtra("kategori", "Pengajar");
+                startActivity(intent);
             }
         });
         linearFood.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                //TODO Food Linear Layout on click listener
+                Intent intent = new Intent(getContext(), KategoriActivity.class);
+                intent.putExtra("kategori", "Tempat Makan");
+                startActivity(intent);
             }
         });
         linearCleaning.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                //TODO Cleaning Linear Layout on click listener
+                Intent intent = new Intent(getContext(), KategoriActivity.class);
+                intent.putExtra("kategori", "Kebersihan");
+                startActivity(intent);
             }
         });
         linearTransportation.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                //TODO Transportation Linear Layout on click listener
+                Intent intent = new Intent(getContext(), KategoriActivity.class);
+                intent.putExtra("kategori", "Transportasi");
+                startActivity(intent);
             }
         });
         return rootView;
