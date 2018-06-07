@@ -3,6 +3,7 @@ package com.parttime.parttime;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,10 +11,13 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,10 +48,12 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
 
     private static final String TAG = SignupActivity.class.getSimpleName();
 
+    private ProgressBar mProgressBar;
+    private ScrollView mSvRegister;
     private Button mBtnSignup, mBtnChooseFile;
-    private TextView mTxtLogin;
+    private TextView mTxtLogin, mTxtLoading;
     private TextInputLayout mTxtName, mTxtTtl,
-            mTxtAddress, mTxtEmail, mTxtPassword;
+    mTxtAddress, mTxtEmail, mTxtPassword;
     private EditText mTxtFilePath;
 
     private FirebaseAuth fAuth;
@@ -73,6 +79,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initWidget() {
+        mSvRegister = findViewById(R.id.sv_register);
         mBtnSignup = findViewById(R.id.button_signup);
         mBtnChooseFile = findViewById(R.id.button_choose_file);
         mTxtLogin = findViewById(R.id.link_login);
@@ -82,6 +89,9 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         mTxtEmail = findViewById(R.id.input_email);
         mTxtPassword = findViewById(R.id.input_password);
         mTxtFilePath = findViewById(R.id.text_file_path);
+        mProgressBar = findViewById(R.id.progress_bar);
+        mTxtLoading = findViewById(R.id.text_loading);
+        mProgressBar.setIndeterminate(true);
         mBtnSignup.setOnClickListener(this);
         mTxtLogin.setOnClickListener(this);
         mBtnChooseFile.setOnClickListener(this);
@@ -103,22 +113,30 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void registerNewUser() {
-        String email = mTxtEmail.getEditText().getText().toString();
-        String password = mTxtPassword.getEditText().getText().toString();
-        fAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    FirebaseUser user = task.getResult().getUser();
-                    createUserInfo(user.getUid());
-                } else {
-                    Toast.makeText(SignupActivity.this,
-                            "Tidak bisa mendaftarkan pengguna", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, task.getException().getMessage());
-                }
-            }
-        });
+        if (isInputValid()) {
+            mSvRegister.setVisibility(View.GONE);
+            mProgressBar.setVisibility(View.VISIBLE);
+            mTxtLoading.setVisibility(View.VISIBLE);
+            String email = mTxtEmail.getEditText().getText().toString();
+            String password = mTxtPassword.getEditText().getText().toString();
+            fAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                FirebaseUser user = task.getResult().getUser();
+                                createUserInfo(user.getUid());
+                            } else {
+                                mProgressBar.setVisibility(View.GONE);
+                                mTxtLoading.setVisibility(View.GONE);
+                                mSvRegister.setVisibility(View.VISIBLE);
+                                Toast.makeText(SignupActivity.this,
+                                        "Tidak bisa mendaftarkan pengguna", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, task.getException().getMessage());
+                            }
+                        }
+                    });
+        }
     }
 
     private void createUserInfo(final String userId) {
@@ -133,15 +151,21 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     public void onSuccess(Void aVoid) {
                         if (isFileExists()) {
                             uploadCv(userId);
+                        } else {
+                            Toast.makeText(SignupActivity.this, "Silahkan pilih CV", Toast.LENGTH_SHORT).show();
                         }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        mProgressBar.setVisibility(View.GONE);
+                        mTxtLoading.setVisibility(View.GONE);
+                        mSvRegister.setVisibility(View.VISIBLE);
                         Toast.makeText(SignupActivity.this,
-                                "Tidak bisa mendaftarkan pengguna", Toast.LENGTH_SHORT).show();
+                                "Pengguna terdaftar tanpa data", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, e.getMessage());
+                        onBackPressed();
                     }
                 });
     }
@@ -159,19 +183,33 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    fFirestore.collection("users")
-                            .document(userId).update("cv",
-                            taskSnapshot.getStorage().getDownloadUrl());
-                    Toast.makeText(SignupActivity.this,
-                            "Register success!", Toast.LENGTH_SHORT).show();
-                    onBackPressed();
+                    taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            mProgressBar.setVisibility(View.GONE);
+                            mTxtLoading.setVisibility(View.GONE);
+                            mSvRegister.setVisibility(View.VISIBLE);
+                            fFirestore.collection("users")
+                                    .document(userId).update("cv",
+                                    uri.toString());
+                            Toast.makeText(SignupActivity.this,
+                                    "Register success!", Toast.LENGTH_SHORT).show();
+                            fAuth.signOut();
+                            onBackPressed();
+                            finish();
+                        }
+                    });
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mTxtLoading.setVisibility(View.GONE);
+                    mSvRegister.setVisibility(View.VISIBLE);
                     Toast.makeText(SignupActivity.this,
-                            "Tidak bisa mendaftarkan pengguna", Toast.LENGTH_SHORT).show();
+                            "Tidak bisa upload document sekarang, coba lagi nanti", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, e.getMessage());
+                    onBackPressed();
                 }
             });
         } catch (FileNotFoundException e) {
@@ -234,5 +272,93 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 mTxtFilePath.setText(path);
             }
         }
+    }
+
+    private boolean isInputValid() {
+        Editable nama = mTxtName.getEditText().getText();
+        Editable ttl = mTxtTtl.getEditText().getText();
+        Editable address = mTxtAddress.getEditText().getText();
+        Editable email = mTxtEmail.getEditText().getText();
+        Editable password = mTxtPassword.getEditText().getText();
+        Editable filePath = mTxtFilePath.getText();
+        if (nama == null || nama.toString().isEmpty()) {
+            mTxtName.setError("Harap isi nama");
+            mTxtName.setErrorEnabled(true);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (ttl == null || ttl.toString().isEmpty()) {
+            mTxtTtl.setError("Harap isi TTL");
+            mTxtTtl.setErrorEnabled(true);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (address == null || address.toString().isEmpty()) {
+            mTxtAddress.setError("Harap isi Alamat");
+            mTxtAddress.setErrorEnabled(true);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (email == null || email.toString().isEmpty()) {
+            mTxtEmail.setError("Harap isi Email");
+            mTxtEmail.setErrorEnabled(true);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (password == null || password.toString().isEmpty()) {
+            mTxtPassword.setError("Harap isi Password");
+            mTxtPassword.setErrorEnabled(true);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtFilePath.setError(null);
+            return false;
+        } else if (filePath == null || password.toString().isEmpty()) {
+            mTxtFilePath.setError("Harap isi CV");
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            mTxtEmail.setError(null);
+            mTxtEmail.setErrorEnabled(false);
+            mTxtAddress.setError(null);
+            mTxtAddress.setErrorEnabled(false);
+            mTxtName.setError(null);
+            mTxtName.setErrorEnabled(false);
+            mTxtTtl.setErrorEnabled(true);
+            mTxtPassword.setError(null);
+            mTxtPassword.setErrorEnabled(false);
+            return false;
+        }
+        return true;
     }
 }
